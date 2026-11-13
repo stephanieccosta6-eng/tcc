@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#FAF4F5">
+    <title>GlowUp - Skincare & Wellness</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        glowPrimary: '#D9777F',
+                        glowDark: '#9E4B53',
+                        glowNude: '#F8E8EE',
+                        glowBg: '#FAF4F5',
+                        glowCyan: '#06B6D4',
+                        glowBlue: '#3B82F6'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #D9777F; border-radius: 10px; }
+        .auth-form-enter { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-[#FAF4F5] sm:bg-slate-900 text-slate-800 flex items-center justify-center min-h-screen p-0 sm:p-4 font-sans select-none sm:select-auto">
+
+    <!-- Moldura Responsiva (Tela Cheia no Celular / Frame Smartphone no Desktop) -->
+    <div class="w-full sm:max-w-[410px] h-[100dvh] sm:h-[840px] bg-[#FAF4F5] sm:rounded-[45px] shadow-2xl overflow-hidden relative flex flex-col border-0 sm:border-[8px] sm:border-slate-800">
+        
+        <!-- Dynamic Island / Notch (Apenas Desktop) -->
+        <div class="hidden sm:flex absolute top-0 left-1/2 -translate-x-1/2 w-36 h-6 bg-slate-800 rounded-b-2xl z-50 items-center justify-center">
+            <div class="w-3 h-3 rounded-full bg-slate-900 mr-2 border border-slate-700"></div>
+            <div class="w-12 h-1.5 rounded-full bg-slate-900 border border-slate-700"></div>
+        </div>
+
+        <!-- Dynamic Header Bar -->
+        <header id="top-header" class="pt-4 sm:pt-8 px-5 pb-3 bg-white/90 backdrop-blur-md border-b border-rose-100 flex items-center justify-between z-40 hidden">
+            <div class="flex items-center gap-2">
+                <span class="w-8 h-8 rounded-full bg-[#F8E8EE] flex items-center justify-center text-[#9E4B53] font-bold text-sm">✨</span>
+                <h1 class="font-bold text-lg text-[#9E4B53]">GlowUp</h1>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="App.toast('Você tem 2 dicas novas de rotina hoje!')" class="relative text-slate-600 hover:text-[#9E4B53] p-1">
+                    <i class="fa-solid fa-bell text-lg"></i>
+                    <span id="notif-badge" class="absolute top-0.5 right-0.5 w-2.5 h-2.5 bg-rose-500 rounded-full"></span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main SPA Content Container -->
+        <main id="app-content" class="flex-1 overflow-y-auto custom-scroll relative">
+            <!-- Screen content is rendered dynamically via JS -->
+        </main>
+
+        <!-- Toast Notification Container -->
+        <div id="toast-container" class="absolute bottom-20 left-1/2 -translate-x-1/2 z-50 w-11/12 pointer-events-none flex flex-col gap-2"></div>
+
+        <!-- Fixed Bottom Navigation Bar -->
+        <nav id="bottom-nav" class="bg-white/95 backdrop-blur-md border-t border-rose-100 py-2.5 px-2 flex justify-around items-center z-40 hidden">
+            <button onclick="App.navigate('home')" id="nav-home" class="flex flex-col items-center text-[#9E4B53] font-medium text-[11px] flex-1">
+                <i class="fa-solid fa-house text-base mb-0.5"></i>
+                <span>Home</span>
+            </button>
+            <button onclick="App.navigate('store')" id="nav-store" class="flex flex-col items-center text-slate-400 hover:text-[#9E4B53] font-medium text-[11px] flex-1">
+                <i class="fa-solid fa-bag-shopping text-base mb-0.5"></i>
+                <span>Loja</span>
+            </button>
+            <button onclick="App.navigate('fridge')" id="nav-fridge" class="flex flex-col items-center text-slate-400 hover:text-[#9E4B53] font-medium text-[11px] flex-1 relative">
+                <i class="fa-solid fa-snowflake text-base mb-0.5 text-[#06B6D4]"></i>
+                <span>GlowFridge</span>
+            </button>
+            <button onclick="App.navigate('tutorials')" id="nav-tutorials" class="flex flex-col items-center text-slate-400 hover:text-[#9E4B53] font-medium text-[11px] flex-1">
+                <i class="fa-solid fa-circle-play text-base mb-0.5"></i>
+                <span>Aulas</span>
+            </button>
+            <button onclick="App.navigate('cart')" id="nav-cart" class="flex flex-col items-center text-slate-400 hover:text-[#9E4B53] font-medium text-[11px] flex-1 relative">
+                <i class="fa-solid fa-cart-shopping text-base mb-0.5"></i>
+                <span>Carrinho</span>
+                <span id="cart-badge" class="absolute -top-1 right-2 bg-[#D9777F] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
+            </button>
+            <button onclick="App.navigate('profile')" id="nav-profile" class="flex flex-col items-center text-slate-400 hover:text-[#9E4B53] font-medium text-[11px] flex-1">
+                <i class="fa-solid fa-user text-base mb-0.5"></i>
+                <span>Perfil</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Application JavaScript Logic -->
+    <script>
+        // Detecta automaticamente o IP/Host atual para funcionar tanto no PC quanto no Celular
+        const API_BASE_URL = `http://${window.location.hostname || 'localhost'}:5000/api`;
+
+        const App = {
+            state: {
+                user: {
+                    name: "Maria Silva",
+                    email: "maria.silva@glowup.com",
+                    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
+                    skinType: "Mista",
+                    goal: "Luminosidade & Brilho",
+                    mood: "✨ Radiante",
+                    constancyPct: 85
+                },
+                currentScreen: "onboarding",
+                authMode: "login",
+                quizStep: 1,
+                quizAnswers: { skinType: "", goal: "" },
+                habits: [
+                    { id: 1, title: "Beber 2L de Água", completed: true },
+                    { id: 2, title: "Protetor Solar", completed: true },
+                    { id: 3, title: "Limpeza Facial", completed: false },
+                    { id: 4, title: "8h de Sono Reparador", completed: false }
+                ],
+                fridge: {
+                    temp: 6,
+                    isOpen: false,
+                    timer: 40,
+                    intervalId: null,
+                    items: [
+                        { id: 1, name: "Sérum Vitamina C", minTemp: 4, maxTemp: 10 },
+                        { id: 2, name: "Máscara Calmante", minTemp: 2, maxTemp: 8 },
+                        { id: 3, name: "Creme para Olhos", minTemp: 5, maxTemp: 12 }
+                    ]
+                },
+                tutorials: [
+                    {
+                        id: "8-Jm7t9eK-U",
+                        title: "Rotina Matinal de Skincare Radiante",
+                        category: "Skincare",
+                        duration: "8 min",
+                        isAI: true,
+                        isFavorite: true,
+                        product: {
+                            name: "Gel de Limpeza Facial 150g",
+                            brand: "Creamy",
+                            temp: "4°C - 8°C",
+                            storeUrl: "https://www.creamy.com.br"
+                        }
+                    },
+                    {
+                        id: "L_LUpnjgPso",
+                        title: "Rotina Noturna de Hidratação Profunda",
+                        category: "Skincare",
+                        duration: "12 min",
+                        isAI: true,
+                        isFavorite: false,
+                        product: {
+                            name: "Sérum Facial Hidratante 30ml",
+                            brand: "Creamy",
+                            temp: "8°C - 12°C",
+                            storeUrl: "https://www.creamy.com.br"
+                        }
+                    }
+                ],
+                products: [
+                    { id: 1, name: "Sérum Vitamina C 10%", brand: "Creamy", price: 79.90, temp: "4°C - 8°C", category: "Skin Care", image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=300&q=80", url: "https://www.creamy.com.br" },
+                    { id: 2, name: "Protetor Solar FPS 60", brand: "Natura", price: 65.00, temp: "15°C - 25°C", category: "Skin Care", image: "https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?auto=format&fit=crop&w=300&q=80", url: "https://www.natura.com.br" },
+                    { id: 3, name: "Batom Hidratante Rose", brand: "Sephora", price: 89.00, temp: "18°C - 22°C", category: "Maquiagem", image: "https://images.unsplash.com/photo-1586495777744-4413f21062fa?auto=format&fit=crop&w=300&q=80", url: "https://www.sephora.com.br" },
+                    { id: 4, name: "Óleo Capilar Reparador", brand: "O Boticário", price: 54.90, temp: "15°C - 30°C", category: "Cabelo", image: "https://images.unsplash.com/photo-1608248597262-838d51717e89?auto=format&fit=crop&w=300&q=80", url: "https://www.boticario.com.br" }
+                ],
+                cart: [
+                    { id: 1, name: "Sérum Vitamina C 10%", brand: "Creamy", price: 79.90, temp: "4°C - 8°C", qty: 1, url: "https://www.creamy.com.br" }
+                ],
+                storeFilter: "Todos",
+                storeSearch: "",
+                tutorialTab: "all"
+            },
+
+            init() {
+                this.render();
+            },
+
+            toast(msg, type = 'info') {
+                const container = document.getElementById('toast-container');
+                if(!container) return;
+                const el = document.createElement('div');
+                el.className = `p-3.5 rounded-2xl text-xs font-semibold text-white shadow-lg flex items-center justify-between border border-white/20 backdrop-blur-md transition-all duration-300 pointer-events-auto ${type === 'danger' ? 'bg-rose-600' : 'bg-[#9E4B53]'}`;
+                el.innerHTML = `<span>${msg}</span><i class="fa-solid fa-xmark cursor-pointer ml-2" onclick="this.parentElement.remove()"></i>`;
+                container.appendChild(el);
+                setTimeout(() => { if(el) el.remove(); }, 3500);
+            },
+
+            navigate(screen) {
+                this.state.currentScreen = screen;
+                this.render();
+            },
+
+            render() {
+                const main = document.getElementById('app-content');
+                const header = document.getElementById('top-header');
+                const nav = document.getElementById('bottom-nav');
+
+                if (this.state.currentScreen === 'onboarding' || this.state.currentScreen === 'auth') {
+                    if(header) header.classList.add('hidden');
+                    if(nav) nav.classList.add('hidden');
+                } else {
+                    if(header) header.classList.remove('hidden');
+                    if(nav) nav.classList.remove('hidden');
+                    this.updateNavHighlight();
+                    this.updateCartBadge();
+                }
+
+                switch (this.state.currentScreen) {
+                    case 'onboarding': main.innerHTML = this.renderOnboarding(); break;
+                    case 'auth': main.innerHTML = this.renderAuth(); break;
+                    case 'home': main.innerHTML = this.renderHome(); break;
+                    case 'store': main.innerHTML = this.renderStore(); break;
+                    case 'fridge': main.innerHTML = this.renderFridge(); break;
+                    case 'tutorials': main.innerHTML = this.renderTutorials(); break;
+                    case 'cart': main.innerHTML = this.renderCart(); break;
+                    case 'profile': main.innerHTML = this.renderProfile(); break;
+                }
+            },
+
+            updateNavHighlight() {
+                ['home', 'store', 'fridge', 'tutorials', 'cart', 'profile'].forEach(screen => {
+                    const btn = document.getElementById(`nav-${screen}`);
+                    if (!btn) return;
+                    if (screen === this.state.currentScreen) {
+                        btn.className = "flex flex-col items-center text-[#9E4B53] font-medium text-[11px] flex-1";
+                    } else {
+                        btn.className = "flex flex-col items-center text-slate-400 hover:text-[#9E4B53] font-medium text-[11px] flex-1";
+                    }
+                });
+            },
+
+            updateCartBadge() {
+                const badge = document.getElementById('cart-badge');
+                if (!badge) return;
+                const total = this.state.cart.reduce((acc, item) => acc + item.qty, 0);
+                if (total > 0) {
+                    badge.innerText = total;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            },
+
+            renderOnboarding() {
+                if (this.state.quizStep === 1) {
+                    return `
+                    <div class="h-full flex flex-col justify-between p-6 bg-gradient-to-b from-[#F8E8EE] via-[#FAF4F5] to-white relative overflow-hidden">
+                        <div class="flex justify-between items-center z-10 pt-2">
+                            <span class="text-xs font-bold tracking-widest text-[#9E4B53] uppercase">GlowUp Experience</span>
+                            <button onclick="App.navigate('auth')" class="text-xs font-medium text-slate-500 hover:text-[#9E4B53] px-2 py-1">Pular</button>
+                        </div>
+
+                        <div class="my-auto text-center z-10 py-4">
+                            <div class="w-44 h-44 mx-auto mb-5 rounded-3xl overflow-hidden shadow-xl border-4 border-white">
+                                <img src="https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover" alt="Skincare Care">
+                            </div>
+                            <h2 class="text-2xl font-bold text-[#9E4B53] mb-2">Sua Jornada de Autocuidado Única</h2>
+                            <p class="text-xs text-slate-600 px-4 leading-relaxed">Descubra rituais de beleza e cuidados integrados com sua rotina diária.</p>
+                        </div>
+
+                        <div class="z-10 bg-white/90 backdrop-blur-md p-5 rounded-3xl border border-rose-100 shadow-md">
+                            <span class="text-[10px] font-bold text-[#D9777F] uppercase tracking-wider block mb-1">Passo 1 de 2</span>
+                            <h3 class="text-sm font-bold text-slate-800 mb-3">Qual é o seu tipo de pele?</h3>
+                            <div class="grid grid-cols-2 gap-2">
+                                ${['Mista', 'Seca', 'Oleosa', 'Sensível'].map(type => `
+                                    <button onclick="App.state.quizAnswers.skinType='${type}'; App.state.quizStep=2; App.render();" class="p-3 text-xs font-medium rounded-2xl border border-rose-100 bg-rose-50/50 active:bg-[#D9777F] active:text-white hover:bg-[#D9777F] hover:text-white transition-all text-left">
+                                        ✨ ${type}
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>`;
+                } else {
+                    return `
+                    <div class="h-full flex flex-col justify-between p-6 bg-gradient-to-b from-[#F8E8EE] via-[#FAF4F5] to-white relative overflow-hidden">
+                        <div class="flex justify-between items-center z-10 pt-2">
+                            <button onclick="App.state.quizStep=1; App.render();" class="text-xs font-medium text-slate-500 py-1"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
+                            <span class="text-xs font-bold text-[#9E4B53]">Passo 2 de 2</span>
+                        </div>
+
+                        <div class="my-auto z-10 py-6">
+                            <h2 class="text-xl font-bold text-[#9E4B53] mb-1">Qual seu principal objetivo?</h2>
+                            <p class="text-xs text-slate-600 mb-6">Personalizaremos suas recomendações diárias.</p>
+                            <div class="flex flex-col gap-2.5">
+                                ${['Luminosidade & Brilho', 'Hidratação Profunda', 'Anti-Idade & Firmeza', 'Controle de Oleosidade'].map(goal => `
+                                    <button onclick="App.finishQuiz('${goal}')" class="p-3.5 text-xs font-medium rounded-2xl border border-rose-100 bg-white active:bg-[#9E4B53] active:text-white hover:bg-[#9E4B53] hover:text-white transition-all text-left shadow-sm flex items-center justify-between">
+                                        <span>💖 ${goal}</span>
+                                        <i class="fa-solid fa-chevron-right text-xs text-[#D9777F]"></i>
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>`;
+                }
+            },
+
+            finishQuiz(goal) {
+                this.state.quizAnswers.goal = goal;
+                this.state.user.skinType = this.state.quizAnswers.skinType || "Mista";
+                this.state.user.goal = goal;
+                this.toast("Quiz concluído! Recomendações atualizadas.");
+                this.navigate('auth');
+            },
+
+            renderAuth() {
+                const isLogin = this.state.authMode === 'login';
+                return `
+                <div class="h-full flex flex-col justify-center p-6 bg-[#FAF4F5]">
+                    <div class="text-center mb-6">
+                        <div class="w-12 h-12 bg-[#F8E8EE] text-[#9E4B53] rounded-2xl flex items-center justify-center mx-auto mb-2 text-xl font-bold shadow-sm">✨</div>
+                        <h2 class="text-xl font-bold text-[#9E4B53]">Bem-vinda ao GlowUp</h2>
+                        <p class="text-xs text-slate-500">Entre para sincronizar sua rotina e geladeira smart</p>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-rose-100 auth-form-enter">
+                        <div class="flex border-b border-rose-100 mb-5">
+                            <button onclick="App.state.authMode='login'; App.render();" class="flex-1 py-2 text-xs font-bold ${isLogin ? 'text-[#9E4B53] border-b-2 border-[#9E4B53]' : 'text-slate-400'}">Entrar</button>
+                            <button onclick="App.state.authMode='register'; App.render();" class="flex-1 py-2 text-xs font-bold ${!isLogin ? 'text-[#9E4B53] border-b-2 border-[#9E4B53]' : 'text-slate-400'}">Criar Conta</button>
+                        </div>
+
+                        <form onsubmit="App.handleAuth(event)" class="space-y-3">
+                            ${!isLogin ? `
+                                <div>
+                                    <label class="text-[11px] font-bold text-slate-600 block mb-1">Seu Nome</label>
+                                    <input type="text" id="auth-name" required value="${this.state.user.name}" class="w-full px-3.5 py-2.5 rounded-xl border border-rose-100 text-xs focus:outline-none focus:ring-1 focus:ring-[#D9777F]">
+                                </div>
+                            ` : ''}
+                            <div>
+                                <label class="text-[11px] font-bold text-slate-600 block mb-1">E-mail</label>
+                                <input type="email" id="auth-email" required value="${this.state.user.email}" class="w-full px-3.5 py-2.5 rounded-xl border border-rose-100 text-xs focus:outline-none focus:ring-1 focus:ring-[#D9777F]">
+                            </div>
+                            <div>
+                                <label class="text-[11px] font-bold text-slate-600 block mb-1">Senha</label>
+                                <input type="password" id="auth-pass" required value="123456" class="w-full px-3.5 py-2.5 rounded-xl border border-rose-100 text-xs focus:outline-none focus:ring-1 focus:ring-[#D9777F]">
+                            </div>
+
+                            <button type="submit" class="w-full py-3 bg-[#D9777F] active:bg-[#9E4B53] hover:bg-[#9E4B53] text-white font-bold text-xs rounded-xl shadow-md transition-all mt-2">
+                                ${isLogin ? 'Entrar na Conta' : 'Cadastrar'}
+                            </button>
+                        </form>
+                    </div>
+                </div>`;
+            },
+
+            async handleAuth(e) {
+                e.preventDefault();
+                const nameEl = document.getElementById('auth-name');
+                const emailEl = document.getElementById('auth-email');
+                const passEl = document.getElementById('auth-pass');
+                
+                const name = nameEl ? nameEl.value : this.state.user.name;
+                const email = emailEl ? emailEl.value : this.state.user.email;
+                const password = passEl ? passEl.value : '123456';
+
+                try {
+                    const endpoint = this.state.authMode === 'login' ? '/auth/login' : '/auth/register';
+                    const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name, email, password })
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.user) {
+                            this.state.user.name = data.user.name;
+                            this.state.user.email = data.user.email;
+                        }
+                    } else {
+                        this.state.user.name = name;
+                        this.state.user.email = email;
+                    }
+                } catch (err) {
+                    // Fallback offline automático caso o servidor Node não esteja ligado
+                    this.state.user.name = name;
+                    this.state.user.email = email;
+                }
+
+                this.toast(`Bem-vinda, ${this.state.user.name}!`);
+                this.navigate('home');
+            },
+
+            renderHome() {
+                const completedCount = this.state.habits.filter(h => h.completed).length;
+                const progressPct = Math.round((completedCount / this.state.habits.length) * 100);
+
+                return `
+                <div class="p-5 space-y-4">
+                    <div class="flex items-center justify-between bg-white p-4 rounded-3xl border border-rose-100 shadow-sm">
+                        <div class="flex items-center gap-3">
+                            <img src="${this.state.user.avatar}" class="w-11 h-11 rounded-full object-cover border-2 border-[#D9777F]">
+                            <div>
+                                <h2 class="text-sm font-bold text-slate-800">Olá, ${this.state.user.name} 👋</h2>
+                                <p class="text-[11px] text-slate-500">Pele ${this.state.user.skinType} • ${this.state.user.goal}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-r from-[#D9777F] to-[#9E4B53] text-white p-4 rounded-3xl shadow-sm">
+                        <span class="text-[10px] font-bold uppercase tracking-wider opacity-80">Dica de Rotina para Você</span>
+                        <p class="text-xs font-medium mt-1 leading-relaxed">Para pele <strong>${this.state.user.skinType}</strong> com foco em <strong>${this.state.user.goal}</strong>, aplique seu Sérum de Vitamina C resfriado (6°C) pela manhã antes do protetor solar.</p>
+                    </div>
+
+                    <div class="bg-[#F8E8EE] p-4 rounded-3xl border border-rose-100">
+                        <h3 class="text-xs font-bold text-[#9E4B53] mb-2">Como está se sentindo hoje?</h3>
+                        <div class="flex justify-between gap-1.5">
+                            ${['✨ Radiante', '💖 Inspirada', '🌿 Relaxada', '😴 Cansada', '💆‍♀️ Estressada'].map(m => `
+                                <button onclick="App.state.user.mood='${m}'; App.toast('Humor registrado: ${m}'); App.render();" class="flex-1 py-2 px-1 bg-white active:bg-[#D9777F] hover:bg-[#D9777F] hover:text-white text-sm rounded-xl transition-all ${this.state.user.mood === m ? 'ring-2 ring-[#9E4B53] font-bold' : ''}">
+                                    ${m.split(' ')[0]}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-3xl border border-rose-100 shadow-sm space-y-3">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-xs font-bold text-slate-800">Check-in Diário de Hábitos</h3>
+                            <span class="text-xs font-bold text-[#9E4B53]">${completedCount}/${this.state.habits.length}</span>
+                        </div>
+                        <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                            <div class="bg-[#D9777F] h-full transition-all duration-500" style="width: ${progressPct}%"></div>
+                        </div>
+                        <div class="space-y-2 pt-1">
+                            ${this.state.habits.map(h => `
+                                <div onclick="App.toggleHabit(${h.id})" class="flex items-center justify-between p-3 rounded-xl border border-slate-50 active:bg-rose-50 cursor-pointer transition-all">
+                                    <span class="text-xs text-slate-700 ${h.completed ? 'line-through text-slate-400' : ''}">${h.title}</span>
+                                    <i class="fa-solid ${h.completed ? 'fa-circle-check text-[#D9777F]' : 'fa-circle text-slate-200'} text-base"></i>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>`;
+            },
+
+            toggleHabit(id) {
+                const habit = this.state.habits.find(h => h.id === id);
+                if (habit) {
+                    habit.completed = !habit.completed;
+                    this.render();
+                }
+            },
+
+            renderStore() {
+                const filtered = this.state.products.filter(p => {
+                    const matchesCat = this.state.storeFilter === 'Todos' || p.category === this.state.storeFilter;
+                    const matchesSearch = p.name.toLowerCase().includes(this.state.storeSearch.toLowerCase()) || p.brand.toLowerCase().includes(this.state.storeSearch.toLowerCase());
+                    return matchesCat && matchesSearch;
+                });
+
+                return `
+                <div class="p-5 space-y-4">
+                    <h2 class="text-lg font-bold text-[#9E4B53]">Catálogo & Parceiros</h2>
+                    
+                    <input type="text" placeholder="Buscar produto ou marca..." value="${this.state.storeSearch}" oninput="App.state.storeSearch=this.value; App.render();" class="w-full px-4 py-2.5 rounded-2xl border border-rose-100 bg-white text-xs focus:outline-none focus:ring-1 focus:ring-[#D9777F]">
+
+                    <div class="flex gap-2 overflow-x-auto pb-1 custom-scroll">
+                        ${['Todos', 'Skin Care', 'Maquiagem', 'Cabelo'].map(cat => `
+                            <button onclick="App.state.storeFilter='${cat}'; App.render();" class="px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all ${this.state.storeFilter === cat ? 'bg-[#9E4B53] text-white' : 'bg-white text-slate-500 border border-rose-100'}">
+                                ${cat}
+                            </button>
+                        `).join('')}
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        ${filtered.map(p => `
+                            <div class="bg-white p-3 rounded-2xl border border-rose-100 shadow-sm flex flex-col justify-between">
+                                <div>
+                                    <img src="${p.image}" class="w-full h-24 object-cover rounded-xl mb-2">
+                                    <span class="text-[9px] font-bold px-2 py-0.5 bg-cyan-50 text-[#06B6D4] rounded-full inline-block mb-1">❄️ ${p.temp}</span>
+                                    <h4 class="text-xs font-bold text-slate-800 line-clamp-1">${p.name}</h4>
+                                    <p class="text-[10px] text-slate-400">${p.brand}</p>
+                                </div>
+                                <div class="mt-2 flex items-center justify-between">
+                                    <span class="text-xs font-bold text-[#9E4B53]">R$ ${p.price.toFixed(2)}</span>
+                                    <button onclick="App.addToCart(${p.id})" class="px-2.5 py-1.5 bg-[#D9777F] text-white text-[10px] font-bold rounded-lg active:bg-[#9E4B53] transition-all">+ Add</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>`;
+            },
+
+            addToCart(id) {
+                const prod = this.state.products.find(p => p.id === id);
+                if (!prod) return;
+                const existing = this.state.cart.find(c => c.id === id);
+                if (existing) {
+                    existing.qty++;
+                } else {
+                    this.state.cart.push({ ...prod, qty: 1 });
+                }
+                this.toast(`${prod.name} adicionado ao carrinho!`);
+                this.updateCartBadge();
+            },
+
+            updateCartQty(id, delta) {
+                const item = this.state.cart.find(c => c.id === id);
+                if (!item) return;
+                item.qty += delta;
+                if (item.qty <= 0) {
+                    this.state.cart = this.state.cart.filter(c => c.id !== id);
+                }
+                this.render();
+            },
+
+            renderFridge() {
+                const f = this.state.fridge;
+                return `
+                <div class="p-5 space-y-4">
+                    <div class="bg-gradient-to-br from-slate-900 to-slate-800 text-white p-5 rounded-3xl shadow-xl space-y-4">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="text-[10px] uppercase font-bold text-[#06B6D4] tracking-wider">Módulo Smart</span>
+                                <h2 class="text-lg font-bold">GlowFridge</h2>
+                            </div>
+                            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${f.isOpen ? 'bg-rose-500 text-white' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'}">
+                                ${f.isOpen ? 'Porta Aberta' : 'Fechada'}
+                            </span>
+                        </div>
+
+                        <div class="text-center py-2">
+                            <div class="text-4xl font-extrabold text-[#06B6D4]">${f.temp}°C</div>
+                            <p class="text-[10px] text-slate-400 mt-1">Temperatura Interna Atual</p>
+                        </div>
+
+                        <div class="flex justify-center gap-4">
+                            <button onclick="App.changeFridgeTemp(-1)" class="w-11 h-11 rounded-xl bg-slate-700 active:bg-slate-600 font-bold text-lg text-white flex items-center justify-center">-</button>
+                            <button onclick="App.changeFridgeTemp(1)" class="w-11 h-11 rounded-xl bg-slate-700 active:bg-slate-600 font-bold text-lg text-white flex items-center justify-center">+</button>
+                        </div>
+
+                        <div class="pt-2 border-t border-slate-700 flex justify-between items-center">
+                            <span class="text-xs text-slate-300">Trava de Segurança (40s)</span>
+                            <button onclick="App.toggleFridgeDoor()" class="px-3.5 py-2 bg-[#06B6D4] active:bg-cyan-600 text-slate-950 font-bold text-xs rounded-xl">
+                                ${f.isOpen ? `Fechar (${f.timer}s)` : 'Abrir Porta'}
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-3xl border border-rose-100 shadow-sm space-y-3">
+                        <h3 class="text-xs font-bold text-slate-800">Cosméticos Guardados</h3>
+                        <div class="space-y-2">
+                            ${f.items.map(item => {
+                                let status = "Ideal";
+                                let fontColor = "text-emerald-600 bg-emerald-50";
+                                if (f.temp < item.minTemp) { status = "Muito Frio"; fontColor = "text-blue-600 bg-blue-50"; }
+                                else if (f.temp > item.maxTemp) { status = "Aquecendo"; fontColor = "text-amber-600 bg-amber-50"; }
+
+                                return `
+                                <div class="flex items-center justify-between p-2.5 rounded-xl border border-slate-100 text-xs">
+                                    <div>
+                                        <div class="font-bold text-slate-700">${item.name}</div>
+                                        <div class="text-[10px] text-slate-400">Recomendado: ${item.minTemp}°C - ${item.maxTemp}°C</div>
+                                    </div>
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${fontColor}">${status}</span>
+                                </div>`;
+                            }).join('')}
+                        </div>
+                    </div>
+                </div>`;
+            },
+
+            changeFridgeTemp(delta) {
+                this.state.fridge.temp += delta;
+                this.render();
+            },
+
+            toggleFridgeDoor() {
+                const f = this.state.fridge;
+                f.isOpen = !f.isOpen;
+                if (f.isOpen) {
+                    f.timer = 40;
+                    if (f.intervalId) clearInterval(f.intervalId);
+                    f.intervalId = setInterval(() => {
+                        f.timer--;
+                        if (f.timer <= 0) {
+                            clearInterval(f.intervalId);
+                            f.isOpen = false;
+                            App.toast("Porta fechada automaticamente por segurança!", "danger");
+                            App.render();
+                        } else {
+                            App.render();
+                        }
+                    }, 1000);
+                } else {
+                    if (f.intervalId) clearInterval(f.intervalId);
+                }
+                this.render();
+            },
+
+            toggleFavTutorial(id) {
+                const tut = this.state.tutorials.find(t => t.id === id);
+                if (tut) {
+                    tut.isFavorite = !tut.isFavorite;
+                    this.toast(tut.isFavorite ? "Aula salva nos favoritos!" : "Removida dos favoritos");
+                    this.render();
+                }
+            },
+
+            renderTutorials() {
+                const list = this.state.tutorialTab === 'fav' 
+                    ? this.state.tutorials.filter(t => t.isFavorite) 
+                    : this.state.tutorials;
+
+                return `
+                <div class="p-5 space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-lg font-bold text-[#9E4B53]">Aulas & Tutoriais</h2>
+                        <div class="flex gap-1 bg-white p-1 rounded-xl border border-rose-100">
+                            <button onclick="App.state.tutorialTab='all'; App.render();" class="px-2.5 py-1 rounded-lg text-[10px] font-bold ${this.state.tutorialTab === 'all' ? 'bg-[#9E4B53] text-white' : 'text-slate-400'}">Todas</button>
+                            <button onclick="App.state.tutorialTab='fav'; App.render();" class="px-2.5 py-1 rounded-lg text-[10px] font-bold ${this.state.tutorialTab === 'fav' ? 'bg-[#9E4B53] text-white' : 'text-slate-400'}">Favoritas</button>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        ${list.length === 0 ? '<p class="text-xs text-slate-500 text-center py-6">Nenhuma aula favoritada ainda.</p>' : list.map(t => `
+                            <div class="bg-white rounded-3xl border border-rose-100 shadow-sm overflow-hidden">
+                                <div class="relative group cursor-pointer" onclick="window.open('https://www.youtube.com/watch?v=${t.id}', '_blank')">
+                                    <img src="https://img.youtube.com/vi/${t.id}/hqdefault.jpg" class="w-full h-44 object-cover">
+                                    <div class="absolute inset-0 bg-slate-900/40 flex items-center justify-center">
+                                        <div class="w-12 h-12 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-[#9E4B53] text-lg pl-1 shadow-lg">
+                                            <i class="fa-solid fa-play"></i>
+                                        </div>
+                                    </div>
+                                    ${t.isAI ? '<span class="absolute top-3 left-3 bg-[#9E4B53] text-white text-[9px] font-bold px-2.5 py-0.5 rounded-full">GlowIA Video</span>' : ''}
+                                    <button onclick="event.stopPropagation(); App.toggleFavTutorial('${t.id}')" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center text-sm shadow">
+                                        <i class="fa-solid fa-heart ${t.isFavorite ? 'text-rose-500' : 'text-slate-300'}"></i>
+                                    </button>
+                                </div>
+                                <div class="p-4 space-y-2">
+                                    <div class="flex justify-between items-start gap-2">
+                                        <h3 class="text-xs font-bold text-slate-800">${t.title}</h3>
+                                        <a href="https://www.youtube.com/watch?v=${t.id}" target="_blank" class="text-[10px] font-bold text-[#9E4B53] whitespace-nowrap">YouTube ↗</a>
+                                    </div>
+                                    <div class="flex justify-between items-center border-t border-slate-50 pt-2">
+                                        <span class="text-[10px] text-slate-400">Produto: ${t.product.name} (${t.product.temp})</span>
+                                        <a href="${t.product.storeUrl}" target="_blank" class="text-[10px] font-bold text-[#D9777F] hover:underline">Comprar ↗</a>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>`;
+            },
+
+            renderCart() {
+                const subtotal = this.state.cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
+                const shipping = this.state.cart.length > 0 ? 12.00 : 0;
+                const total = subtotal + shipping;
+
+                return `
+                <div class="p-5 space-y-4">
+                    <h2 class="text-lg font-bold text-[#9E4B53]">Carrinho de Compras</h2>
+                    ${this.state.cart.length === 0 ? `
+                        <div class="bg-white p-6 rounded-3xl text-center border border-rose-100 shadow-sm">
+                            <i class="fa-solid fa-cart-shopping text-3xl text-rose-200 mb-2"></i>
+                            <p class="text-xs text-slate-500 mb-4">Seu carrinho de compras está vazio.</p>
+                            <button onclick="App.navigate('store')" class="px-4 py-2 bg-[#D9777F] text-white font-bold text-xs rounded-xl">Explorar Produtos</button>
+                        </div>
+                    ` : `
+                        <div class="space-y-3">
+                            ${this.state.cart.map(item => `
+                                <div class="bg-white p-3 rounded-2xl border border-rose-100 flex items-center justify-between text-xs shadow-sm">
+                                    <div class="flex-1 pr-2">
+                                        <div class="font-bold text-slate-800">${item.name}</div>
+                                        <div class="text-[10px] text-slate-400">${item.brand} • R$ ${item.price.toFixed(2)}</div>
+                                    </div>
+                                    <div class="flex items-center gap-2 mr-2">
+                                        <button onclick="App.updateCartQty(${item.id}, -1)" class="w-7 h-7 rounded-lg bg-rose-50 text-[#9E4B53] font-bold flex items-center justify-center">-</button>
+                                        <span class="font-bold text-xs">${item.qty}</span>
+                                        <button onclick="App.updateCartQty(${item.id}, 1)" class="w-7 h-7 rounded-lg bg-rose-50 text-[#9E4B53] font-bold flex items-center justify-center">+</button>
+                                    </div>
+                                    <a href="${item.url}" target="_blank" class="px-3 py-2 bg-[#9E4B53] text-white font-bold text-[10px] rounded-xl active:bg-[#D9777F] transition-all">Comprar ↗</a>
+                                </div>
+                            `).join('')}
+
+                            <div class="bg-white p-4 rounded-3xl border border-rose-100 shadow-sm space-y-2 text-xs">
+                                <div class="flex justify-between text-slate-500">
+                                    <span>Subtotal</span>
+                                    <span>R$ ${subtotal.toFixed(2)}</span>
+                                </div>
+                                <div class="flex justify-between text-slate-500">
+                                    <span>Frete Estimado</span>
+                                    <span>R$ ${shipping.toFixed(2)}</span>
+                                </div>
+                                <div class="pt-2 border-t border-slate-100 flex justify-between items-center font-bold text-sm">
+                                    <span class="text-slate-800">Total</span>
+                                    <span class="text-[#9E4B53]">R$ ${total.toFixed(2)}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `}
+                </div>`;
+            },
+
+            renderProfile() {
+                return `
+                <div class="p-5 space-y-4">
+                    <div class="bg-white p-5 rounded-3xl border border-rose-100 shadow-sm text-center space-y-3">
+                        <div class="relative w-20 h-20 mx-auto">
+                            <img src="${this.state.user.avatar}" class="w-20 h-20 rounded-full object-cover border-4 border-[#D9777F]">
+                            <label class="absolute bottom-0 right-0 bg-[#9E4B53] text-white p-1.5 rounded-full cursor-pointer text-xs shadow-md">
+                                <i class="fa-solid fa-camera"></i>
+                                <input type="file" accept="image/*" class="hidden" onchange="App.handleAvatarUpload(event)">
+                            </label>
+                        </div>
+                        <div>
+                            <h2 class="text-base font-bold text-slate-800">${this.state.user.name}</h2>
+                            <p class="text-xs text-slate-500">${this.state.user.email}</p>
+                        </div>
+                        <div class="flex justify-center gap-2 text-xs pt-1 flex-wrap">
+                            <span class="px-3 py-1 bg-rose-50 text-[#9E4B53] font-semibold rounded-full">Pele: ${this.state.user.skinType}</span>
+                            <span class="px-3 py-1 bg-rose-50 text-[#9E4B53] font-semibold rounded-full">${this.state.user.goal}</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-3xl border border-rose-100 shadow-sm space-y-3">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-xs font-bold text-slate-800">Relatório de Constância</h3>
+                            <span class="text-xs font-bold text-emerald-600">${this.state.user.constancyPct}% este mês</span>
+                        </div>
+                        <div class="flex items-end justify-between h-24 pt-4 px-2">
+                            ${[
+                                { day: 'Seg', pct: 80 },
+                                { day: 'Ter', pct: 100 },
+                                { day: 'Qua', pct: 60 },
+                                { day: 'Qui', pct: 90 },
+                                { day: 'Sex', pct: 75 },
+                                { day: 'Sáb', pct: 100 },
+                                { day: 'Dom', pct: 85 }
+                            ].map(d => `
+                                <div class="flex flex-col items-center gap-1">
+                                    <div class="w-6 bg-[#F8E8EE] rounded-t-lg relative flex items-end overflow-hidden" style="height: 60px;">
+                                        <div class="w-full bg-[#D9777F] rounded-t-lg" style="height: ${d.pct}%"></div>
+                                    </div>
+                                    <span class="text-[10px] font-medium text-slate-500">${d.day}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-3xl border border-rose-100 shadow-sm overflow-hidden">
+                        <button onclick="App.navigate('auth')" class="w-full p-3.5 text-left text-xs font-bold text-rose-600 active:bg-rose-50 flex items-center justify-between">
+                            <span><i class="fa-solid fa-right-from-bracket text-[#9E4B53] mr-2"></i> Sair da Conta</span>
+                            <i class="fa-solid fa-chevron-right text-slate-300"></i>
+                        </button>
+                    </div>
+                </div>`;
+            },
+
+            handleAvatarUpload(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    this.state.user.avatar = event.target.result;
+                    this.toast("Foto de perfil atualizada!");
+                    this.render();
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => App.init());
+    </script>
+</body>
+</html>
